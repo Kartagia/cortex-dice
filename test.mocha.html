@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mocha Test for Preact Temporal</title>
+    <script type="importmap">
+    {
+      "imports": {
+        "w3": "https://www.w3schools.com/lib/w3.js",
+        "htm/preact": "https://esm.sh/htm@3.1.1/preact?external=preact",
+        "preact": "https://esm.sh/preact@10.23.1",
+        "preact/": "https://esm.sh/preact@10.23.1/",
+        "mocha":"https://esm.sh/mocha",
+        "chai":"https://esm.sh/chai@4",
+        "#model/": "./model/",
+        "#view/": "./view/",
+        "#test/": "./test.mocha/",
+        "#controller": "./controller/"
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="https://unpkg.com/mocha/mocha.css" />
+  <script defer src="https://unpkg.com/mocha/mocha.js"></script>
+  
+  </head>
+  
+  <body>
+    <div id='mocha'></div>
+    <script src="https://unpkg.com/mocha/mocha.js"></script>
+    <script type="module" class="mocha-init">
+      console.log('Mocha setup')
+      mocha.setup("bdd");
+      mocha.checkLeaks();
+      console.log('Setup complente')
+    </script>
+    <script type="module" src="./test.mocha/index.js"></script>
+    
+    <script type="module" class="mocha-exec">
+      console.info('Start tests')
+      await mocha.run();
+      console.info("Run complete")
+    </script>
+  </body>
+
+</html>
