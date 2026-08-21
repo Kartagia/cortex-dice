@@ -119,20 +119,20 @@
   */
  export class Combinations {
    /**
-    * @type {[Combination, number][]}
+    * @type {[Combination<Side>, number][]}
     */
    #combinations = new Map([])
    
    /**
     * Create a combinations with given options.
     * @override 
-    * @param {Iterable<Combination<Side>>} init The initial combinations 
+    * @param {Iterable<Combination<Side>|[Combination<Side>, number]>} init The initial combinations 
     * @param {Options} options The options of the combinations.
     */
    /**
     * Create a combinations with default equality.
     * @override
-    * @param {Iterable<Combination<Side>>} init The initial combinations 
+    * @param {Iterable<Combination<Side>|[Combi nation<Side>,number]>} init The initial combinations 
     */
    constructor(init, options={}) {
      const equal = options.equal ?? (options.unordered ? equalPermutation : equalCombination )
@@ -141,13 +141,15 @@
        equal
      })
      for (const member of init) {
+       const key = Array.isArray(member) ? member[0] : member;
+       const addedCount = Array.isArray(member) ? member[1] : 1;
        const index = this.#combinations.findIndex(
-         ([combo, count]) => this.#options.equal(combo, member)
+         ([combo, count]) => this.#options.equal(combo, key)
        );
        if (index < 0) {
-         this.#combinations = this.#combinations.append([member, 1])
+         this.#combinations = this.#combinations.append([key, addedCount])
        } else {
-         this.#combinations = this.#combinations.toSpliced(index, 1, [member, this.#combinations[index][1] + 1])
+         this.#combinations = this.#combinations.toSpliced(index, 1, [key, this.#combinations[index][1] + addedCount])
        }
      }
    }
