@@ -1,0 +1,27 @@
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_DRAFT == "true"
+      when: never
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
+      when: never
+    - if: $CI_COMMIT_BRANCH
+    - when: always
+
+stages:
+  - build
+
+merge-job:
+  stage: build
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      when: always
+    - when: never
+  script:
+    - echo "The merge request is not a draft request"
+    
+build-job:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push"
+  script:
+    - echo "Handling push to $CI_COMMIT_BRANCH"
