@@ -46,31 +46,44 @@ export function filterIndexByBestValue(array, count, compare = defaultCompare) {
  if (count < 0) {
   count += array.length
  }
+ try {
+  console.group(`filter ${count} best value indexes on ${array} `);
  if (count >= 1) {
   return array.reduce(
    (acc, value, index, values) => {
     if (acc.length < count) {
      const insertIndex = acc.findIndex(c => compare(values[c], value) > 0)
      if (insertIndex < 0) {
+      console.debug(`Appending ${index}`)
       acc.push(index)
      } else {
+      console.debug(`Inserting ${index} at ${insertIndex}`)
       acc.splice(insertIndex, 0, index);
      }
+     console.table(acc)
      return acc;
     } else {
      const insertIndex = acc.findIndex(c => compare(values[c], value) > 0)
      if (insertIndex > 0) {
+      console.debug(`Inserting ${index} at ${insertIndex} and cutting ${acc.slice(0,1)}`)
       acc.splice(insertIndex, 0, index);
-      acc.unshift()
-     } else if (inserIndex < 0) {
+      acc.splice(0, 1)
+     } else if (insertIndex < 0) {
+      console.debug(`Appending ${index} and cutting [${acc.slice(0,1)}]`)
       acc.push(index)
-      acc.unshift();
+      acc.splice(0, 1)
      }
+     console.table(acc)
      return acc;
     }
    },
    []
   )
+ }
+ 
+ } finally {
+  console.groupEnd();
+ 
  }
  return [];
 }
