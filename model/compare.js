@@ -124,10 +124,10 @@ export function filterByBestValue(array, count, compare = defaultCompare) {
      const insertIndex = acc.findIndex(c => compare(c, value) > 0)
      if (insertIndex > 0) {
       acc.splice(insertIndex, 0, value);
-      acc.unshift()
-     } else if (inserIndex < 0) {
+      acc.shift()
+     } else if (insertIndex < 0) {
       acc.push(value)
-      acc.unshift();
+      acc.shift();
      }
      return acc;
     }
