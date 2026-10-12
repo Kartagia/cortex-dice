@@ -355,7 +355,21 @@ export class CortexDie extends SimpleDie {
   * The cortex dice in increasing order of magnitude.
   */
  static DICE = Object.freeze([4, 6, 8, 10, 12].map(sideCount => new CortexDie(sideCount)));
- 
+ static get D4() {
+  return CortexDie.DICE[0]
+ }
+ static get D6() {
+ return CortexDie.DICE[1]
+}
+static get D8() {
+ return CortexDie.DICE[2]
+}
+static get D10() {
+ return CortexDie.DICE[3]
+}
+static get D12() {
+  return CortexDie.DICE[4]
+ }
  /**
   * @param {number} sideCount - the number of sided for the die.
   */
