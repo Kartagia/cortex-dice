@@ -22,7 +22,7 @@ export function testCortexRollResult() {
       }
     },
     {
-      title: "Two selected dice D4 and D8",
+      title: "Two selected dice D4(2) and D8(5)",
       param: [[CortexDie.DICE[0], 2, true], [CortexDie.DICE[2],5, true]],
       expected: {
         selected: [[CortexDie.DICE[0], 2, true], [CortexDie.DICE[2],5, true]],
@@ -32,6 +32,56 @@ export function testCortexRollResult() {
         result: 7
       }
     },
+    {
+      title: "Two selected dice D4(2) and D8(5), and unselected dice D10(5), D4(2), D6(2)",
+      param: [[CortexDie.DICE[0], 2, true], [CortexDie.DICE[2],5, true], [CortexDie.D10,5], [CortexDie.D4,2], [CortexDie.D6,2]
+      ],
+      expected: {
+        selected: [[CortexDie.DICE[0], 2, true], [CortexDie.DICE[2],5, true]],
+        available: [
+          [CortexDie.D10,5], [CortexDie.D4,2], [CortexDie.D6,2]
+        ],
+        hitches: [],
+        effect: [],
+        result: 7
+      }
+      },
+    {
+      title: "Two selected dice D4(2) and D8(5), effect die D10(5), and unselected dice D10(5), D4(2), D6(2)",
+      param: [[CortexDie.DICE[0], 2, true], [CortexDie.DICE[2],5, true], [CortexDie.D10,5,"effect"], [CortexDie.D4,2], [CortexDie.D6,2]
+      ],
+      expected: {
+        selected: [[CortexDie.DICE[0], 2, true], [CortexDie.DICE[2],5, true]],
+        available: [
+           [CortexDie.D4,2], [CortexDie.D6,2]
+        ],
+        hitches: [],
+        effect: [
+          [CortexDie.D10,5,"effect"]
+        ],
+        result: 7
+      }
+    },
+    {
+      title: "Two selected dice D4(2) and D8(5), and unselected dice D10(5), D4(2), D6(2), and hitch D12(1)",
+      param: [[CortexDie.DICE[0], 2, true], 
+      [CortexDie.D12,1],
+      [CortexDie.DICE[2],5, true],
+        [CortexDie.D10,5], [CortexDie.D4,2], [CortexDie.D6,2]
+      ],
+      expected: {
+        selected: [[CortexDie.DICE[0], 2, true], [CortexDie.DICE[2],5, true]],
+        available: [
+          [CortexDie.D10,5], [CortexDie.D4,2], [CortexDie.D6,2]
+        ],
+        hitches: [
+          [CortexDie.D12,1]
+        ],
+        effect: [],
+        result: 7
+      }
+    },
+    
   ]
   describe("Construction", () => {
     const cases = Promise.allSettled(createCases.map(
