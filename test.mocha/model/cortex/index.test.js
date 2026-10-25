@@ -1,12 +1,14 @@
 import {expect} from "chai";
 import {testNumberLike} from "./numberlike.test.js"
 import {checkIndex, CortexRollResult, CortexDie, CortexPool} from "#model/cortex/index.js"
+import testPaths from "././path.test.js"
 const suites =[]
 const cases = []
 cases.push(
   ["Test loaded", () => it("Test works", () => {})],
   ["NumberLike", testNumberLike]
 )
+suites.push(["Paths", testPaths])
 
 export function testCortexRollResult() {
   const createCases = [
