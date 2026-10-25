@@ -1,4 +1,5 @@
 import { SimpleDie } from "#model/dice.js"
+import {Sfx} from "./sfx.js"
 import { defaultCompare, filterIndexByBestValue } from "#model/compare.js"
 /**
  * Dice mechanics for cortex prime.
@@ -42,11 +43,11 @@ export function checkIndex(index, options) {
  if (!Number.isSafeInteger(index)) {
   if (!Number.isFinite(index)) {
    throw options.error ?? new RangeError("Non-integer index")
-  } 
+  }
   if (options.truncate) {
    try {
     index = Math.trunc(index)
-   } catch(err) {
+   } catch (err) {
     throw options.error ?? new RangeError("Non-integer index")
    }
   }
@@ -55,11 +56,11 @@ export function checkIndex(index, options) {
   }
  }
  if (index < 0 && options.allowNegative) {
-   index += options.length;
-  } 
-  if (index < 0 || options.minIndex && index < options.minIndex) {
-   throw options.error ?? new RangeError("Index too small")
-  }
+  index += options.length;
+ }
+ if (index < 0 || options.minIndex && index < options.minIndex) {
+  throw options.error ?? new RangeError("Index too small")
+ }
  
  if (index >= options.length || options.maxIndex && index > options.maxIndex) {
   throw options.error ?? new RangeError("Index too large")
@@ -83,7 +84,7 @@ export function checkIndex(index, options) {
  * @param {CortexRollResult<TStatus>} source
  * @return {CortexDieResult} A copy of the result.
  */
- 
+
 /**
  * @template {string} [TStatus="effect"] - the status classes.
  * @overload
@@ -126,7 +127,7 @@ export class CortexRollResult {
  isEffectResult(result) {
   return result[2] === "effect"
  }
-  /**
+ /**
   * Test result is a selected die result.
   * @param {CortexDieResult<TStatus>} result
   * @returns {boolean} Whether the result is a selected die.
@@ -134,7 +135,7 @@ export class CortexRollResult {
  isSelectedResult(result) {
   return result[2] === true;
  }
-  /**
+ /**
   * Test result is a hitch die result.
   * @param {CortexDieResult<TStatus>} result
   * @returns {boolean} Whether the result is a hitch die.
@@ -142,7 +143,7 @@ export class CortexRollResult {
  isHitchResult(result) {
   return result[1] === 1;
  }
-  /**
+ /**
   * Test result is an available die result.
   * @param {CortexDieResult<TStatus>} result
   * @returns {boolean} Whether the result is an available die.
@@ -263,7 +264,7 @@ export class CortexRollResult {
   * @throws {SyntaxError} - the selected indexes contained duplicate value.
   * @throws {RangeError} - the selected index contained an invalid index.
   */
- select(selectedIndexes=undefined, log=undefined) {
+ select(selectedIndexes = undefined, log = undefined) {
   const strict = this.strict;
   const selected = this.selected;
   if (selectedIndexes) {
@@ -304,14 +305,14 @@ export class CortexRollResult {
    // Select as many possible until select count number are selected.
    const newSelected = this.maxSelected - selected.length
    if (newSelected > 0) {
-   const indexes = filterIndexByBestValue(this.available, newSelected, (a,b) => defaultCompare(values[a], values[b]))
+    const indexes = filterIndexByBestValue(this.available, newSelected, (a, b) => defaultCompare(values[a], values[b]))
    }
    return this.create(
-    this.#rolled.reduce( (acc, result, index) => {
+    this.#rolled.reduce((acc, result, index) => {
      
      if (result[2] === false) {
       if (indexes.includes(acc.unselectedIndex)) {
-      acc.result.push([result[0], result[1], true])
+       acc.result.push([result[0], result[1], true])
       } else {
        acc.result.push(result)
       }
@@ -320,11 +321,10 @@ export class CortexRollResult {
       acc.result.push(result);
      }
     },
-     {
-      result: [],
-      unselectedIndex: 0
-     }
-    ).result);
+    {
+     result: [],
+     unselectedIndex: 0
+    }).result);
   }
  }
  
@@ -359,15 +359,15 @@ export class CortexDie extends SimpleDie {
   return CortexDie.DICE[0]
  }
  static get D6() {
- return CortexDie.DICE[1]
-}
-static get D8() {
- return CortexDie.DICE[2]
-}
-static get D10() {
- return CortexDie.DICE[3]
-}
-static get D12() {
+  return CortexDie.DICE[1]
+ }
+ static get D8() {
+  return CortexDie.DICE[2]
+ }
+ static get D10() {
+  return CortexDie.DICE[3]
+ }
+ static get D12() {
   return CortexDie.DICE[4]
  }
  /**
@@ -385,6 +385,141 @@ static get D12() {
  compareTo(another) {
   if (another instanceof CortexDie) {
    return defaultCompare(this.sides.length, another.sides.length)
+  }
+ }
+}
+
+/**
+ * A trait is a cortex die with a category.
+ */
+export class CortexTrait extends CortexDie {
+ 
+ /**
+  * The default trait sets.
+  * @type {ReadonlyArray<string>}
+  */
+ static get DEFAULT_CATEGORIES() {
+  return ["attributes", "skills", "distinctions", "affiliations", "relationships", "powers", "roles", "values"]
+ }
+ /**
+  * The title of the trait.
+  * @type {string}
+  */
+ #title;
+ /**
+  * The category of the trait.
+  * @type {string}
+  */
+ #category;
+ 
+ /**
+  * Does the trait have SFX.
+  */
+ #hasSfx = false;
+ 
+ /**
+  * The category of the trait.
+  * - Every trait in a trait set share same category.
+  * @type {string}
+  */
+ get category() {
+  return this.#category;
+ }
+ 
+ get hasSfx() {
+  return this.#hasSfx
+ }
+ /**
+  * @overload
+  * @param {CortexTrait} source - the cortex trait, whose copy is created.
+  */
+ /**
+  * @overload
+  * @param {string} title - the title of the trait.
+  * @param {CortexDie} baseDie - the die of the trait.
+  * @param {string} category
+  * @param {boolean} hasSfx
+  */
+ /**
+  * @overload
+  * @param {string} title - the title of the trait.
+  * @param {number} sideCount - the number of sides of the trait.
+  * @param {string} category
+  * @param {boolean} hasSfx
+  */
+ constructor(title, sideCount, category=undefined, hasSfx = false) {
+  if (typeof sideCount === "number") {
+   super(sideCount);
+   this.#title = title;
+   this.#hasSfx = hasSfx
+   this.#category = category;
+  } else if (category !== undefined) {
+   super(sideCount.sides.length)
+   this.#title = title;
+   this.#hasSfx = hasSfx
+   this.#category = category;
+  } else {
+   super(title.sides.length)
+   this.#title = title.title;
+   this.#hasSfx = title.hasSfx
+   this.#category = title.category;
+  }
+  
+ }
+}
+
+
+export class CortexDistinction extends CortexTrait {
+ 
+ /**
+  * Create hinder SFX.
+  * @param {string} traitName - the name of the affectes trait.
+  * @param {string} [category] - the name of the affected trait category. Defaults to "distinctions"
+  * @returns {Sfx} The hinder SFX for the trait 
+  */
+ static HINDER(traitName, category="distinctions") {
+  return {
+   name: "hinder",
+   cost: -1,
+   title: "Hinder",
+   effect: {
+    target: `${category}.${traitName}`,
+    replaceDie: CortexDie.D4
+   }
+  }
+ }
+ 
+ /**
+  * The highlight traits of the distinction.
+  */
+ #highlights;
+ /**
+  * The SFX tied to the distinction.
+  */
+ #sfx;
+ 
+ 
+ /**
+  * @oveeload
+  * @param {CortexDistinction} source - the copied distinction.
+  */
+ /**
+  * Create a distinction.
+  * @overload
+  * @param {string} title
+  * @param {CortexDie} [value]
+  * @param {ReadonlyArray<[string, string]>} [highlights] - the highlighted traits as tuple [category, title]
+  * @param {ReadonlyArray<Sfx>} [optionalSfx] - the optional sfxes in addition to the hinder.
+  */
+ constructor(title, value=undefined, highlights = [], optionalSfx=[]) {
+  if (value === undefined) {
+   super(title)
+   this.#highlights = [...title.highlights];
+   this.#sfx = [...title.sfx]
+  } else {
+  super(title, value ?? CortexDie.D8, "distinctions", true);
+  this.#highlights = [...highlights];
+  this.#sfx = [CortexDistinction.HINDER(title), ...optionalSfx]
   }
  }
 }
@@ -421,14 +556,15 @@ export class CortexPool {
  }
 }
 
+
 export class Resource {
- constructor(die, count=1) {
+ constructor(die, count = 1) {
   
  }
  roll() {
   const rolled = [];
   let max = 0;
-  for (let i=0; i < count; i++) {
+  for (let i = 0; i < count; i++) {
    const roll = die.roll()
    rolled.push(roll)
    if (roll > max) {
@@ -472,20 +608,21 @@ export class ResourcesPool {
   }
   if (count >= this.#members.length) {
    return this.create([])
-  } if (count <= 0) {
+  }
+  if (count <= 0) {
    return this.create(this.#members)
   } else if (count > 0) {
-   return this.create(this.#members.slice(0,this.#members.length - count))
+   return this.create(this.#members.slice(0, this.#members.length - count))
   }
  }
  
  roll() {
-  const results = this.members.map( resource => [die, resource.roll()] );
+  const results = this.members.map(resource => [die, resource.roll()]);
   return new CortexRollResult(results)
   if (results.available.length) {
    // The result is among available.
   } else {
-   return 
+   return
   }
  }
 }
@@ -495,10 +632,10 @@ export class ResourcesPool {
  */
 export class DifficultyPool extends CortexPool {
  
- static VERY_EASY= new DifficultyPool(CortexDie.DICE[0])
- static EASY= new DifficultyPool(CortexDie.DICE[1])
+ static VERY_EASY = new DifficultyPool(CortexDie.DICE[0])
+ static EASY = new DifficultyPool(CortexDie.DICE[1])
  static CHALLENGE = new DifficultyPool(CortexDie.DICE[2])
- static HARD= new DifficultyPool(CortexDie.DICE[3])
+ static HARD = new DifficultyPool(CortexDie.DICE[3])
  static VERY_HARD = new DifficultyPool(CortexDie.DICE[4])
  /**
   * The difficulty pool.
@@ -517,8 +654,8 @@ export class BasicCortexPool extends CortexPool {
  
  constructor(
   primaries,
-  resources=[],
- opportunities=[]
+  resources = [],
+  opportunities = []
  ) {
   super(primaries);
   this.#primaryCount = primaries.length;

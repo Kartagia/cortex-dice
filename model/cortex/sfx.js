@@ -1,7 +1,15 @@
-/**
+import {isTargetPath} from "./path.js"
+ 
+ /**
  * @typedef {readonly [string, string]} CategoryMemberTargetPath
  */
 
+/**
+ * @extends {TypeGuard<ReadonlyArray<CortexDie>>}
+ */
+export function isCortexDicePool(value, opt = undefined) {
+  return Array.isArray(context) && context.every( c => c instanceof CortexDie)
+}
 
 /**
  * @typedef Target
@@ -14,7 +22,7 @@
  */
 
 /**
- * @template {Target} [TTarget=TraitTarget]
+ * @template {TraitTargetModel} [TTarget=TraitTargetModel]
  * @typedef {TTarget & {actor: string} } ActorTargetModel
  */
 
@@ -23,14 +31,17 @@
  * @property {CortexDie} die - the target die.
  */
 /**
- * @typedef AssetTargetModel
+ * @typedef {TraitTargetModel} AssetTargetModel
+ * @property {"asset"} category - the trait category.
  * @property {string} name - the asset name.
  */
 /**
- * @typedef ComplicationTargetModel
+ * @typedef {TraitTargetModel} ComplicationTargetModel
+ * @property {"complication"} category - the trait category.
  * @property {string} name - the complication name.
  */
 /**
+ * A condition for a dice pool limited Sfx.
  * @typedef PoolCondition
  * @property {TraitTargetModel|AssetTargetModel|ComplicationTargetModel|DieTargetModel} target - the condition target selecting tested dice.
  * @property {boolean} [complement] - is test negated.
@@ -41,10 +52,13 @@
  */
 
 /**
- * @typedef {PoolCondition & ({hitch?: boolean;}|{selected?:boolean;}|{effect?:boolean;})} ResultCondition
+ * A die condition including result limitation.
+ * - If more than one condition is set, any matching result condition is accepted;
+ * @typedef {PoolCondition & ({hitch?: boolean; selected?:boolean; effect?:boolean; available?:boolean}} ResultCondition
  * @property {boolean} [hitch] - the rolled die is a hitch.
  * @property {boolean} [selected] - the rolled die is a selected die.
  * @property {boolean} [effect] - the rolled die is an effect die.
+ * @property {boolean} [available] - the die is available.
  */
 
 /**
@@ -60,16 +74,45 @@
 
 /**
  * @overload
- * @param {Condition<DieTargetModel>} condition
- * @param {ReadonlyArray<CortexDie@>} dice
+ * @param {Condition<PoolCondition>} condition
+ * @param {ReadonlyArray<CortexDie>} dice
+ * @return {ReadonlyArray<[CortexDie, number]>}
  */
 export function checkDieCondition(condition, dice) {
-  
+  const predicate = (die, index, allDice) => {
+    if (condition.minValue && die.compare(condition.minValue) < 0) return false;
+    if (condition.maxValue && die.compare(condition.maxValue) > 0) return false;
+    return true;
+  }
+  const passed = dice.reduce(
+    (acc, die, index, allDice) => {
+      if (predicate(die, index, allDice)) {
+        acc.push([die, index])
+      }
+      return acc
+    },
+    []
+  )
+  if ("maxCount" in condition && passed.length > condition.maxCount) return undefined;
+  if ("minCount" in condition && passed.length < condition.minCount) return undefined;
+  return passed;
 }
 
 
 export function checkCondition(condition, context) {
+  let passed = undefined;
+  if ("die" in condition) {
+    if (isCortexDicePool(context)) {
+    passed = checkDieCondition(condition, context)
+    } else if ("dice" in context && isCortexDicePool(context.dice)) {
+      passed = checkDieCondition(condition, context.dice)
+    } else {
+      return undefined;
+    }
+  }
   
+  if (passed?.length ?? 0 === 0) return undefined;
+  return passed;
 }
 
 /**
