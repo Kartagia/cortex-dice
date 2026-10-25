@@ -1,0 +1,38 @@
+:root {
+  --error: #fe1010;
+  --error-bg: #000060;
+  --warning: #fe8000;
+  --warning-bg: #000060;
+  --success: #00fe10;
+  --success-bg: #000060;
+  --foreground: silver;
+  --background: navy;
+  --disabled: gray;
+  --border: var(var(--foreground));
+  --primary-bg: blue;
+  --primary-fg: #a9f9a9;
+}
+
+html {
+  color: var(--foreground);
+  background-color: var(--background);
+  border-color: var(--border);
+}
+
+.hidden {
+  display: none;
+}
+
+.success {
+  color: var(--success);
+  background-color: var(--success-bg);
+}
+
+.warning {
+  color: var(--warning);
+  background-color: var(--warning-bg);
+}
+.error {
+  color: var(--error);
+  background-color: var(--error-bg);
+}
