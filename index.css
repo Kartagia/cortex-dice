@@ -1,0 +1,89 @@
+:root {
+  --error: #fe1010;
+  --error-bg: #000060;
+  --warning: #fe8000;
+  --warning-bg: #000060;
+  --success: #00fe10;
+  --success-bg: #000060;
+  --foreground: silver;
+  --background: navy;
+  --disabled: gray;
+  --border: var(--foreground)
+  --primary-bg: blue;
+  --primary-fg: #a9f9a9
+}
+
+html {
+  color: var(--foreground);
+  background-color: var(--background);
+  border-color: var(--border);
+}
+.hidden {
+  display: none;
+}
+.success {
+  color: var(--success, green);
+  background-color: var(--success-bg);
+}
+.warning {
+  color: var(--warning, orange);
+  background-color: var(--warning-bg);
+}
+.error {
+  color: var(--error, red);
+  background-color: var(--error-bg);
+}
+
+.select-field, .input-field {
+  border: 1mm solid;
+border-radius: 3mm;
+padding: 2mm;
+margin: 1mm;
+}
+.select-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.select-field > label {
+  background-color: var(--primary-bg);
+  color: var(--primary-fg);
+  text-align: center;
+  width: 100%;
+  border-bottom: 1mm solid;
+}
+.select-field > select {
+  width: 100%;
+}
+
+.input-field {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-gap: 1em;
+  
+}
+.select-option {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border: none;
+  border-radius: 3mm;
+  padding: 2mm;
+  margin: 1mm;
+}
+
+.input-field label {
+  background-color: var(--primary-bg);
+  color: var(--primary-fg);
+  margin: 0 auto;
+}
+
+.dice-pool {
+  display: flex;
+  flex-direction: row;
+  gap: 0.2em;
+}
+.dice-pool .dice {
+  border-radius: 0.2em;
+  border-style: solid;
+  padding: 0.2em;
+}
